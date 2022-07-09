@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:effects="clr-namespace:XFOutlinedMaterialEntry.Effects"
     x:Class="XFOutlinedMaterialEntry.Components.OutlinedMaterialEntry"
+    x:Name="this"
     Margin="0"
     Padding="0, 5, 0, 10"
     RowDefinitions="Auto, Auto"
@@ -14,16 +15,52 @@
         <TapGestureRecognizer Tapped="OutlinedMaterialEntryTapped" />
     </Grid.GestureRecognizers>
 
-    <Frame
+    <!-- Main Label text -->
+    <Label
+        x:Name="mainLabelText"
         Grid.Row="0"
         Grid.Column="0"
-        Grid.ColumnSpan="2"
-        x:Name="containerFrame"
-        BackgroundColor="White"
-        BorderColor="Gray"
-        CornerRadius="10"
-        HasShadow="False"
-        Padding="{OnPlatform Android='1.5', iOS='1.5', UWP='5', macOS='7'}">
+        Margin="0, 0, 0, 0"
+        FontSize="15"
+        FontFamily="Poppins"
+        TextColor="#202020"
+        Text="{Binding MainLabelText,FallbackValue='Label'}"
+        VerticalTextAlignment="End"
+        LineBreakMode="WordWrap"
+        BackgroundColor="Transparent"
+        IsVisible="true" />
+    
+    <Label
+        x:Name="labelCommand"
+        Grid.Row="0"
+        Grid.Column="1"
+        Margin="0, 0, 0, 0"
+        FontSize="15"
+        FontFamily="Poppins"
+        TextColor="#0971CE"
+        Text="{Binding LabelCommandText,FallbackValue='Command'}"
+        TextDecorations="Underline"
+        HorizontalTextAlignment="End"
+        VerticalTextAlignment="End"
+        BackgroundColor="Transparent"
+        IsVisible="false" 
+        >
+        <Label.GestureRecognizers>
+            <TapGestureRecognizer Tapped="ActionLabelTapped" />
+        </Label.GestureRecognizers>
+    </Label>
+    
+    <Frame
+           Grid.Row="1"
+           Grid.Column="0"
+           Grid.ColumnSpan="2"
+           x:Name="containerFrame"
+           HeightRequest="50"
+           BackgroundColor="#F3F9FF"
+           BorderColor="#C1E0FC"
+           CornerRadius="4"
+           HasShadow="False"
+           Padding="{OnPlatform Android='1.5', iOS='1.5', UWP='5', macOS='7'}">
         <StackLayout
             Orientation="Horizontal">
             
@@ -31,8 +68,9 @@
             <Image
                 x:Name="leadingIcon"
                 HorizontalOptions="Start"
-                Margin="18, 0, 0, 0" 
-                HeightRequest="24"
+                Margin="10, 0, 0, 0" 
+                HeightRequest="16"
+                BackgroundColor="Transparent"
                 IsVisible="False">
                 <Image.Triggers>
                     <Trigger
@@ -41,7 +79,7 @@
                         Value="True">
                         <Setter
                             Property="WidthRequest"
-                            Value="24" />
+                            Value="21.4" />
                     </Trigger>
                     <Trigger
                         TargetType="Image"
@@ -58,9 +96,10 @@
             <Entry
                 x:Name="customEntry"
                 HorizontalOptions="FillAndExpand"
-                Margin="{OnPlatform Android='18, 0, 18, 0', iOS='18, 10, 0, 10'}"
-                BackgroundColor="White"
-                FontSize="Medium"
+                Margin="{OnPlatform Android='5, 0, 10, 0', iOS='18, 10, 0, 10'}"
+                BackgroundColor="Transparent"
+                FontSize="15"
+                FontFamily="Poppins"
                 TextColor="Black"
                 Focused="CustomEntryFocused"
                 Unfocused="CustomEntryUnfocused">
@@ -75,16 +114,18 @@
                 x:Name="trailingIcon"
                 HorizontalOptions="End"
                 Margin="0, 0, 18, 0"
-                HeightRequest="24"
-                WidthRequest="24" />
+                HeightRequest="16"
+                WidthRequest="21.4" 
+                BackgroundColor="Transparent"/>
             
             <!-- Eye icon for password -->
             <Image
                 x:Name="passwordIcon"
                 HorizontalOptions="End"
                 Margin="0, 0, 18, 0"
-                HeightRequest="24"
-                WidthRequest="24"
+                HeightRequest="16"
+                WidthRequest="21.4"
+                BackgroundColor="Transparent"
                 IsVisible="False">
                 <Image.GestureRecognizers>
                     <TapGestureRecognizer Tapped="PasswordEyeTapped" />
@@ -113,11 +154,14 @@
 
     <!-- Placeholder -->
     <StackLayout
+        Grid.Row="1"
+        Grid.Column="0"
+        Grid.ColumnSpan="2"
         x:Name="placeholderContainer"
         HorizontalOptions="FillAndExpand"
         VerticalOptions="Start"
-        BackgroundColor="White"
-        Padding="5, 0">
+        BackgroundColor="Transparent"
+        Padding="0, 0">
         <StackLayout.Triggers>
             <DataTrigger
                 TargetType="StackLayout"
@@ -125,7 +169,7 @@
                 Value="True">
                 <Setter
                     Property="Margin"
-                    Value="45, 10, 36, 0" />
+                    Value="40, 12, 36, 0" />
             </DataTrigger>
             <DataTrigger
                 TargetType="StackLayout"
@@ -133,47 +177,51 @@
                 Value="False">
                 <Setter
                     Property="Margin"
-                    Value="15, 10, 40, 0" />
+                    Value="10, 12, 40, 0" />
             </DataTrigger>
         </StackLayout.Triggers>
         <Label
             x:Name="placeholderText"
             VerticalOptions="CenterAndExpand"
-            VerticalTextAlignment="Center"
-            FontSize="Medium"
-            TextColor="Gray" />
+            Margin="0,4,0,2"
+            FontSize="15"
+            FontFamily="Poppins"
+            TextColor="#808080" />
     </StackLayout>
 
     <!-- Helper text -->
     <Label
         x:Name="helperText"
-        Grid.Row="1"
+        Grid.Row="2"
         Grid.Column="0"
-        Margin="18, 0, 0, 0"
-        FontSize="Small"
-        TextColor="Gray"
+        Margin="0, 0, 0, 0"
+        FontSize="10.67"
+        TextColor="#808080"
         LineBreakMode="WordWrap"
+        BackgroundColor="Transparent"
         IsVisible="false" />
 
     <!-- Char counter -->
     <Label
         x:Name="charCounterText"
-        Grid.Row="1"
+        Grid.Row="2"
         Grid.Column="1"
         Margin="0, 0, 18, 0"
         HorizontalTextAlignment="End"
-        FontSize="Small"
-        TextColor="Gray"
+        FontSize="10.67"
+        TextColor="#808080"
+        BackgroundColor="Transparent"
         IsVisible="false" />
 
     <!-- Error text -->
     <Label
         x:Name="errorText"
-        Grid.Row="1"
+        Grid.Row="2"
         Grid.Column="0"
-        Margin="18, 0, 0, 0"
-        FontSize="Small"
-        TextColor="Red"
+        Margin="0, 0, 0, 0"
+        FontSize="10.67"
+        TextColor="#EB565D"
+        BackgroundColor="Transparent"
         LineBreakMode="WordWrap"
         IsVisible="false" />
 </Grid>

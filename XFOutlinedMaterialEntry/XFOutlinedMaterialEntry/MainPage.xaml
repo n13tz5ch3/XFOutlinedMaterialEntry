@@ -32,6 +32,9 @@
             <components:OutlinedMaterialEntry
                 PlaceholderText="Outlined Material Entry"
                 Keyboard="Text"
+                MainLabelText="Outline"
+                IsPlaceHolderAnimated="False"
+                HasLabelCommand="True"
                 ReturnType="Next" />
             
             <components:OutlinedMaterialEntry
@@ -61,6 +64,7 @@
             <components:OutlinedMaterialEntry
                 PlaceholderText="With error"
                 Keyboard="Email"
+                IsPassword="True"
                 ReturnType="Next"
                 HasError="True"
                 ErrorText="Error message" />

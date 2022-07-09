@@ -9,7 +9,83 @@ namespace XFOutlinedMaterialEntry.Components
     public partial class OutlinedMaterialEntry : Grid
     {
         private ImageSource tempIcon;
+        
+        /* Label Command */
+        
+        public static readonly BindableProperty LabelCommandProperty = BindableProperty.Create(
+            nameof(LabelCommand), 
+            typeof(ICommand), 
+            typeof(OutlinedMaterialEntry), 
+            null,
+            BindingMode.OneWay,
+            null,
+            ((bindable, value, newValue) =>
+            {
+                var view = (OutlinedMaterialEntry)bindable;
 
+                view.LabelCommand = (Command)newValue;
+
+            }));
+        
+        /* Label Command Text */
+        
+        public static readonly BindableProperty LabelCommandTextProperty = BindableProperty.Create(
+            nameof(LabelCommandText),
+            typeof(string),
+            typeof(OutlinedMaterialEntry),
+            "Command",
+            BindingMode.TwoWay,
+            null,
+            (bindable, oldValue, newValue) =>
+            {
+                var view = (OutlinedMaterialEntry)bindable;
+
+                view.labelCommand.Text = (string)newValue;
+            }
+        );
+        
+        /* Label Text */
+        
+        public static readonly BindableProperty MainLabelTextProperty = BindableProperty.Create(
+            nameof(MainLabelText),
+            typeof(string),
+            typeof(OutlinedMaterialEntry),
+            "Label",
+            BindingMode.TwoWay,
+            null,
+            (bindable, oldValue, newValue) =>
+            {
+                var view = (OutlinedMaterialEntry)bindable;
+
+                view.mainLabelText.Text = (string)newValue;
+            }
+        );
+        
+        public static readonly BindableProperty HasLabelCommandProperty = BindableProperty.Create(
+            nameof(HasLabelCommand),
+            typeof(bool),
+            typeof(OutlinedMaterialEntry),
+            default(bool),
+            BindingMode.OneWay,
+            null,
+            (bindable, oldValue, newValue) =>
+            {
+                var view = (OutlinedMaterialEntry)bindable;
+                
+                view.labelCommand.IsVisible = (bool)newValue;
+            }
+        );
+        
+        public static readonly BindableProperty IsPlaceHolderAnimatedProperty = BindableProperty.Create(
+            nameof(IsPlaceHolderAnimated),
+            typeof(bool),
+            typeof(OutlinedMaterialEntry),
+            default(bool),
+            BindingMode.OneWay,
+            null,
+            null
+        );
+        
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
             typeof(string),
@@ -122,20 +198,23 @@ namespace XFOutlinedMaterialEntry.Components
 
                 view.errorText.IsVisible = (bool)newValue;
 
-                view.containerFrame.BorderColor = view.errorText.IsVisible ? Color.Red : Color.Black;
+                view.containerFrame.BorderColor = view.errorText.IsVisible ? Color.FromHex("#EB565D") : Color.FromHex("#C1E0FC");
+                view.containerFrame.BackgroundColor = view.errorText.IsVisible ? Color.FromHex("#FEF3F1") : Color.FromHex("#F3F9FF");
 
                 view.helperText.IsVisible = !view.errorText.IsVisible;
 
-                view.placeholderText.TextColor = view.errorText.IsVisible ? Color.Red : Color.Gray;
+                view.placeholderText.TextColor = view.errorText.IsVisible ? Color.FromHex("#EB565D") : Color.FromHex("#808080");
 
                 view.PlaceholderText = view.errorText.IsVisible ? $"{view.PlaceholderText}*" : view.PlaceholderText;
 
                 if (view.TrailingIcon != null && !view.TrailingIcon.IsEmpty)
                     view.tempIcon = view.TrailingIcon;
-
+                
+                /* TODO: Add correct resource
                 view.TrailingIcon = view.errorText.IsVisible
                     ? ImageSource.FromFile("ic_error.png")
                     : view.tempIcon;
+                    */
 
                 view.trailingIcon.IsVisible = view.errorText.IsVisible;
             }
@@ -214,6 +293,46 @@ namespace XFOutlinedMaterialEntry.Components
         public event EventHandler<EventArgs> EntryCompleted;
 
         public event EventHandler<TextChangedEventArgs> TextChanged;
+
+        public ICommand LabelCommand
+        {
+            get =>(ICommand)GetValue(LabelCommandProperty); 
+            set => SetValue(LabelCommandProperty, value);
+        }
+        
+        // Helper method for invoking commands safely
+        public static void Execute(ICommand command)
+        {
+            if (command == null) return;
+            if (command.CanExecute(null))
+            {
+                command.Execute(null);
+            }
+        }
+
+        public string LabelCommandText
+        {
+            get => (string)GetValue(LabelCommandTextProperty);
+            set => SetValue(LabelCommandTextProperty, value);
+        }
+        
+        public string MainLabelText
+        {
+            get => (string)GetValue(MainLabelTextProperty);
+            set => SetValue(MainLabelTextProperty, value);
+        }
+
+        public bool HasLabelCommand
+        {
+            get => (bool)GetValue(HasLabelCommandProperty);
+            set => SetValue(HasLabelCommandProperty, value);
+        }
+
+        public bool IsPlaceHolderAnimated
+        {
+            get => (bool)GetValue(IsPlaceHolderAnimatedProperty);
+            set => SetValue(IsPlaceHolderAnimatedProperty, value);
+        }
 
         public string Text
         {
@@ -297,15 +416,24 @@ namespace XFOutlinedMaterialEntry.Components
             {
                 this.customEntry.Focus();
 
-                this.containerFrame.BorderColor = this.HasError ? Color.Red : this.BorderColor;
-                this.placeholderText.TextColor = this.HasError ? Color.Red : this.BorderColor;
+                this.containerFrame.BorderColor = this.HasError ? Color.FromHex("#EB565D") : Color.FromHex("#C1E0FC");
+                if (this.IsPlaceHolderAnimated)
+                {
+                    this.placeholderText.TextColor = this.HasError ? Color.FromHex("#EB565D") : Color.FromHex("#C1E0FC");
+                    
+                    int y = DeviceInfo.Platform == DevicePlatform.UWP ? -25 : -36;
+                    int x = -10;
+                
+                    this.mainLabelText.IsVisible = false;
+                    this.labelCommand.IsVisible = false;
 
-                int y = DeviceInfo.Platform == DevicePlatform.UWP ? -25 : -20;
+                    await this.placeholderContainer.TranslateTo(x, y, 100, Easing.Linear);
 
-                await this.placeholderContainer.TranslateTo(0, y, 100, Easing.Linear);
-
-                this.placeholderContainer.HorizontalOptions = LayoutOptions.Start;
-                this.placeholderText.FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label));
+                    this.placeholderContainer.HorizontalOptions = LayoutOptions.Start;
+                    this.placeholderText.FontSize = 15.0;
+                    
+                }
+                
             }
             else
                 await this.ControlUnfocused();
@@ -313,17 +441,23 @@ namespace XFOutlinedMaterialEntry.Components
 
         private async Task ControlUnfocused()
         {
-            this.containerFrame.BorderColor = this.HasError ? Color.Red : Color.Black;
-            this.placeholderText.TextColor = this.HasError ? Color.Red : Color.Gray;
-
+            this.containerFrame.BorderColor = this.HasError ? Color.FromHex("#EB565D") : Color.FromHex("#C1E0FC");
+            this.containerFrame.BackgroundColor = this.HasError ? Color.FromHex("#FEF3F1") : Color.FromHex("#F3F9FF");
+            this.placeholderText.TextColor = this.HasError ? Color.FromHex("#EB565D") : Color.FromHex("#808080");
+            
             this.customEntry.Unfocus();
-
-            if (string.IsNullOrEmpty(this.customEntry.Text) || this.customEntry.MaxLength <= 0)
+            
+            if (this.IsPlaceHolderAnimated)
             {
-                await this.placeholderContainer.TranslateTo(0, 0, 100, Easing.Linear);
+                if (string.IsNullOrEmpty(this.customEntry.Text) || this.customEntry.MaxLength <= 0)
+                {
+                    await this.placeholderContainer.TranslateTo(0, 0, 100, Easing.Linear);
+                    this.mainLabelText.IsVisible = true;
+                    this.labelCommand.IsVisible = true;
                 
-                this.placeholderContainer.HorizontalOptions = LayoutOptions.FillAndExpand;
-                this.placeholderText.FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label));
+                    this.placeholderContainer.HorizontalOptions = LayoutOptions.FillAndExpand;
+                    this.placeholderText.FontSize = 15.0;
+                }
             }
         }
 
@@ -356,6 +490,11 @@ namespace XFOutlinedMaterialEntry.Components
             if (this.charCounterText.IsVisible)
                 this.charCounterText.Text = $"{this.customEntry.Text.Length} / {this.MaxLength}";
 
+            if (!this.IsPlaceHolderAnimated)
+            {
+                this.placeholderText.IsVisible = (this.customEntry.Text.Length == 0);
+            }
+
             this.TextChanged?.Invoke(this, e);
         }
 
@@ -363,5 +502,11 @@ namespace XFOutlinedMaterialEntry.Components
         {
             this.EntryCompleted?.Invoke(this, EventArgs.Empty);
         }
+
+        private void ActionLabelTapped(object sender, EventArgs e)
+        {
+            Execute(LabelCommand);
+        }
+
     }
 }
